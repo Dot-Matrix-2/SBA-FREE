@@ -1,0 +1,256 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
+---
+
+<Layout title="SBA 7(a) Eligibility Quiz" description="A free, anonymous quiz to see whether your business may qualify for an SBA 7(a) term loan. No personal information required.">
+  <div class="wrap">
+    <div class="quiz" id="quiz" data-turnstile-sitekey={siteKey}>
+      <h1>SBA 7(a) Eligibility Quiz</h1>
+      <div id="intro">
+        <p>
+          Answer a few questions about your business and the loan you want. <strong>We do not ask for your name,
+          business name, or any identifying information</strong>, and your answers stay in your browser unless you
+          choose to ask for a lender referral at the end.
+        </p>
+        <p class="notice">
+          This quiz is for general information only. It is not a credit decision. Free SBA Info is not a lender or
+          loan broker.
+        </p>
+        <p><button class="btn big" type="button" id="start">Start the quiz</button></p>
+      </div>
+      <div id="stage" hidden></div>
+      <noscript><p class="callout">This quiz needs JavaScript. You can still read our <a href="/learn/eligibility/">eligibility guide</a>.</p></noscript>
+    </div>
+  </div>
+
+  <script>
+    import { questions, labelFor, type Question, type QuestionId } from '../lib/quiz/questions';
+    import { evaluate, type Answers, type Result } from '../lib/quiz/rules';
+    import { CONSENT_TEXT, CONSENT_VERSION, US_STATES } from '../lib/consent';
+
+    const root = document.getElementById('quiz') as HTMLElement;
+    const intro = document.getElementById('intro') as HTMLElement;
+    const stage = document.getElementById('stage') as HTMLElement;
+    const siteKey = root.dataset.turnstileSitekey ?? '';
+    const answers: Answers = {};
+    let index = 0;
+
+    function el<K extends keyof HTMLElementTagNameMap>(
+      tag: K,
+      props: Record<string, string> = {},
+      children: (Node | string)[] = [],
+    ): HTMLElementTagNameMap[K] {
+      const node = document.createElement(tag);
+      for (const [k, v] of Object.entries(props)) {
+        if (k === 'class') node.className = v;
+        else node.setAttribute(k, v);
+      }
+      node.append(...children);
+      return node;
+    }
+
+    function focusHeading() {
+      (stage.querySelector('legend, h2') as HTMLElement | null)?.setAttribute('tabindex', '-1');
+      (stage.querySelector('legend, h2') as HTMLElement | null)?.focus();
+    }
+
+    function renderQuestion() {
+      const q: Question = questions[index];
+      const pct = Math.round((index / questions.length) * 100);
+      const fieldset = el('fieldset', {}, [el('legend', {}, [q.title])]);
+      if (q.help) fieldset.append(el('p', { class: 'help' }, [q.help]));
+      const opts = el('div', { class: 'opts' });
+      q.options.forEach((o) => {
+        const input = el('input', { type: 'radio', name: q.id, value: o.value });
+        if (answers[q.id] === o.value) input.checked = true;
+        input.addEventListener('change', () => {
+          answers[q.id] = o.value;
+          next.disabled = false;
+        });
+        opts.append(el('label', { class: 'opt' }, [input, o.label]));
+      });
+      fieldset.append(opts);
+
+      const back = el('button', { type: 'button', class: 'btn secondary' }, ['Back']);
+      back.disabled = index === 0;
+      back.addEventListener('click', () => {
+        index -= 1;
+        renderQuestion();
+      });
+      const next = el('button', { type: 'button', class: 'btn' }, [index === questions.length - 1 ? 'See my results' : 'Next']);
+      next.disabled = !answers[q.id];
+      next.addEventListener('click', () => {
+        if (index === questions.length - 1) renderResult();
+        else {
+          index += 1;
+          renderQuestion();
+        }
+      });
+
+      const bar = el('div', { class: 'progress', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': String(pct) }, [
+        el('span', { style: `width:${pct}%` }),
+      ]);
+      stage.replaceChildren(
+        el('p', { class: 'step-label' }, [`Question ${index + 1} of ${questions.length}`]),
+        bar,
+        fieldset,
+        el('div', { class: 'quiz-nav' }, [back, next]),
+      );
+      focusHeading();
+    }
+
+    function list(items: string[]): HTMLElement {
+      return el('ul', {}, items.map((t) => el('li', {}, [t])));
+    }
+
+    function renderResult() {
+      const r: Result = evaluate(answers);
+      const heading = {
+        eligible: 'You may be eligible for an SBA 7(a) term loan',
+        review: 'You may be eligible, but a lender will look closely at a few items',
+        ineligible: 'An SBA 7(a) loan may not be the right fit right now',
+      }[r.status];
+      const intro = {
+        eligible: 'Based on your answers, nothing here appears to disqualify you. Only a lender can approve a loan after reviewing a full application.',
+        review: 'Nothing below automatically disqualifies you, but each item could make approval harder.',
+        ineligible: 'Based on your answers, the following appear to be obstacles:',
+      }[r.status];
+
+      const box = el('div', { class: `result ${r.status}` }, [el('h2', {}, [heading]), el('p', {}, [intro])]);
+      if (r.blockers.length) box.append(list(r.blockers));
+      if (r.cautions.length) {
+        box.append(el('h3', {}, ['Things a lender will look at']), list(r.cautions));
+      }
+      stage.replaceChildren(box);
+
+      if (r.alternatives.length) {
+        const alts = el('div', { class: 'cards' });
+        r.alternatives.forEach((a) =>
+          alts.append(
+            el('div', { class: 'card' }, [
+              el('h3', {}, [a.name]),
+              el('p', {}, [a.description]),
+              el('a', { class: 'more', href: a.href, rel: 'noopener' }, ['Learn more at sba.gov']),
+            ]),
+          ),
+        );
+        stage.append(el('h2', {}, [r.status === 'ineligible' ? 'Options to consider' : 'Other options worth knowing']), alts);
+      }
+
+      if (r.status === 'eligible') stage.append(referralPrompt());
+
+      const again = el('button', { type: 'button', class: 'btn secondary' }, ['Retake the quiz']);
+      again.addEventListener('click', () => {
+        for (const k of Object.keys(answers)) delete answers[k as QuestionId];
+        index = 0;
+        renderQuestion();
+      });
+      stage.append(el('p', {}, [again]), el('p', { class: 'reviewed' }, ['Next: read our ', el('a', { href: '/learn/how-to-apply/' }, ['how-to-apply guide']), '.']));
+      focusHeading();
+    }
+
+    function referralPrompt(): HTMLElement {
+      const wrapEl = el('section', { class: 'section', id: 'referral' });
+      wrapEl.append(
+        el('h2', {}, ['Optional: get introduced to an SBA lender']),
+        el('p', {}, [
+          'Although it is not necessary, we would be happy to refer you to reputable SBA lenders. This is completely optional and free. ',
+          'If you say yes, you will share your contact information, and we will pass it along with your quiz answers to several SBA lenders we have relationships with. ',
+          'Free SBA Info is not a lender and not a commercial loan broker.',
+        ]),
+      );
+      const yes = el('button', { type: 'button', class: 'btn' }, ['Yes, refer me to lenders']);
+      yes.addEventListener('click', () => {
+        yes.replaceWith(referralForm());
+      });
+      wrapEl.append(yes, ' ', el('span', { class: 'reviewed' }, ['No thanks? Just close this page. Nothing has been sent.']));
+      return wrapEl;
+    }
+
+    function field(label: string, name: string, type = 'text', extra: Record<string, string> = {}) {
+      return el('label', { class: 'field' }, [label, el('input', { name, type, required: '', ...extra })]);
+    }
+
+    function referralForm(): HTMLElement {
+      const form = el('form', { novalidate: '' });
+      const grid = el('div', { class: 'form-grid' }, [
+        field('Your name', 'name', 'text', { autocomplete: 'name', maxlength: '100' }),
+        field('Business name', 'businessName', 'text', { autocomplete: 'organization', maxlength: '150' }),
+        field('Email', 'email', 'email', { autocomplete: 'email', maxlength: '150' }),
+        field('Phone', 'phone', 'tel', { autocomplete: 'tel', maxlength: '30' }),
+      ]);
+      const select = el('select', { name: 'state', required: '', autocomplete: 'address-level1' }, [
+        el('option', { value: '' }, ['Select…']),
+        ...Object.entries(US_STATES).map(([code, name]) => el('option', { value: code }, [name])),
+      ]);
+      grid.append(el('label', { class: 'field' }, ['State where the business operates', select]));
+
+      const consent = el('input', { type: 'checkbox', name: 'consent', required: '' });
+      const consentRow = el('label', { class: 'consent' }, [consent, el('span', {}, [CONSENT_TEXT])]);
+      const honeypot = el('input', { type: 'text', name: 'website', tabindex: '-1', autocomplete: 'off', 'aria-hidden': 'true', class: 'hp' });
+      const turnstile = el('div', { class: 'cf-turnstile', 'data-sitekey': siteKey });
+      const submit = el('button', { type: 'submit', class: 'btn big' }, ['Send my information to SBA lenders']);
+      const msg = el('div', { role: 'status', 'aria-live': 'polite' });
+      form.append(grid, consentRow, honeypot, ...(siteKey ? [turnstile] : []), el('p', {}, [submit]), msg);
+
+      if (siteKey && !document.querySelector('script[data-turnstile]')) {
+        const s = el('script', { src: 'https://challenges.cloudflare.com/turnstile/v0/api.js', async: '', defer: '', 'data-turnstile': '' });
+        document.head.append(s);
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        msg.className = '';
+        msg.textContent = '';
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+        const data = new FormData(form);
+        submit.disabled = true;
+        submit.textContent = 'Sending…';
+        try {
+          const res = await fetch('/api/lead', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              name: data.get('name'),
+              businessName: data.get('businessName'),
+              email: data.get('email'),
+              phone: data.get('phone'),
+              state: data.get('state'),
+              website: data.get('website'),
+              consent: true,
+              consentVersion: CONSENT_VERSION,
+              turnstileToken: data.get('cf-turnstile-response') ?? '',
+              quiz: Object.fromEntries(
+                Object.entries(answers).map(([k, v]) => [k, { value: v, label: labelFor(k as QuestionId, v as string) }]),
+              ),
+            }),
+          });
+          const body = (await res.json().catch(() => ({}))) as { error?: string };
+          if (!res.ok) throw new Error(body.error ?? 'Something went wrong.');
+          form.replaceChildren(
+            el('div', { class: 'form-msg ok' }, [
+              'Thank you. Your information has been shared with our partner SBA lenders, and one or more of them may contact you. You are under no obligation to proceed.',
+            ]),
+          );
+        } catch (err) {
+          msg.className = 'form-msg err';
+          msg.textContent = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+          submit.disabled = false;
+          submit.textContent = 'Send my information to SBA lenders';
+        }
+      });
+      return form;
+    }
+
+    document.getElementById('start')?.addEventListener('click', () => {
+      intro.hidden = true;
+      stage.hidden = false;
+      renderQuestion();
+    });
+  </script>
+</Layout>

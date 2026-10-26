@@ -1,0 +1,66 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { topics } from '../lib/topics';
+---
+
+<Layout title="Free SBA Info">
+  <section class="hero">
+    <div class="wrap">
+      <h1>Free Information About SBA 7(a) Term Loans</h1>
+      <p>
+        Free SBA Info is a free-to-use website for U.S. small business owners. We created it to help you
+        understand whether your business may qualify for an SBA 7(a) term loan. Everything here is free, with
+        no sign-up required.
+      </p>
+      <p class="notice">
+        <strong>Please note:</strong> we are not a lender, and we are not a commercial loan broker. We do not
+        make loans or negotiate loan terms. We simply provide information.
+      </p>
+      <p>
+        <a class="btn big" href="/quiz/">Take the Free Eligibility Quiz</a>
+      </p>
+      <p class="reviewed">
+        About 3 minutes. We never ask for your name, business name, or any identifying information.
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <h2>How it works</h2>
+      <div class="cards">
+        <div class="card">
+          <h3>1. Learn the basics</h3>
+          <p>Read plain-English guides on what a 7(a) loan is, what it costs, and how to apply.</p>
+        </div>
+        <div class="card">
+          <h3>2. Take the anonymous quiz</h3>
+          <p>Answer a few questions about your business and the loan you want. No personal details are collected.</p>
+        </div>
+        <div class="card">
+          <h3>3. Decide on next steps</h3>
+          <p>
+            See whether you may be eligible. If you are, you can optionally ask to be referred to a reputable
+            SBA lender. It is completely your choice.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="wrap">
+      <h2>Learn about SBA 7(a) loans</h2>
+      <div class="cards">
+        {topics.slice(0, 6).map((t) => (
+          <div class="card">
+            <h3>{t.title}</h3>
+            <p>{t.summary}</p>
+            <a class="more" href={t.href}>Read more</a>
+          </div>
+        ))}
+      </div>
+      <p><a href="/learn/">See all topics</a></p>
+    </div>
+  </section>
+</Layout>

@@ -1,0 +1,7 @@
+# Copy to .dev.vars for local `wrangler pages dev`. Never commit real secrets.
+# Cloudflare Turnstile secret (test secret that always passes):
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA
+# Lender CRM endpoints (add one block per lender, up to LENDER_5):
+# LENDER_1_NAME=Example Lender
+# LENDER_1_URL=https://api.example-lender.com/leads
+# LENDER_1_KEY=changeme

@@ -1,0 +1,22 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { topics } from '../../lib/topics';
+---
+
+<Layout title="Learn About SBA 7(a) Loans" description="Plain-English guides to SBA 7(a) term loans: eligibility, uses, rates, collateral, and how to apply.">
+  <div class="wrap">
+    <p class="crumbs"><a href="/">Home</a> / Learn</p>
+    <h1>Learn About SBA 7(a) Loans</h1>
+    <p>Free guides written for small business owners. Start anywhere, or <a href="/quiz/">take the quiz</a>.</p>
+    <div class="cards">
+      {topics.map((t) => (
+        <div class="card">
+          <h3>{t.title}</h3>
+          <p>{t.summary}</p>
+          <a class="more" href={t.href}>Read more</a>
+        </div>
+      ))}
+    </div>
+  </div>
+  <div class="section"></div>
+</Layout>

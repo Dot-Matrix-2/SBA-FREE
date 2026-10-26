@@ -1,0 +1,26 @@
+---
+import Layout from './Layout.astro';
+
+interface Props {
+  frontmatter: { title: string; description?: string; reviewed?: string };
+}
+
+const { frontmatter } = Astro.props;
+---
+
+<Layout title={frontmatter.title} description={frontmatter.description}>
+  <div class="wrap">
+    <p class="crumbs">
+      <a href="/">Home</a>{Astro.url.pathname.startsWith('/learn') && <> / <a href="/learn/">Learn</a></>}
+    </p>
+    <article class="article">
+      <h1>{frontmatter.title}</h1>
+      {frontmatter.reviewed && <p class="reviewed">Last reviewed: {frontmatter.reviewed}</p>}
+      <slot />
+      <p class="callout">
+        <strong>Ready to see where you stand?</strong>
+        <a href="/quiz/">Take the free, anonymous eligibility quiz</a>. No personal information required.
+      </p>
+    </article>
+  </div>
+</Layout>
