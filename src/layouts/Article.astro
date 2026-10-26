@@ -18,7 +18,7 @@ const { frontmatter } = Astro.props;
       {frontmatter.reviewed && <p class="reviewed">Last reviewed: {frontmatter.reviewed}</p>}
       <slot />
       <p class="callout">
-        <strong>Ready to see where you stand?</strong>
+        <strong>Ready to see where you stand?</strong>{' '}
         <a href="/quiz/">Take the free, anonymous eligibility quiz</a>. No personal information required.
       </p>
     </article>
