@@ -5,7 +5,7 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
 ---
 
 <Layout title="SBA 7(a) Eligibility Quiz" description="A free, anonymous quiz to see whether your business may qualify for an SBA 7(a) term loan. No personal information required.">
-  <div class="wrap">
+  <div class="quiz-page"><div class="wrap">
     <div class="quiz" id="quiz" data-turnstile-sitekey={siteKey}>
       <h1>SBA 7(a) Eligibility Quiz</h1>
       <div id="intro">
@@ -23,7 +23,7 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
       <div id="stage" hidden></div>
       <noscript><p class="callout">This quiz needs JavaScript. You can still read our <a href="/learn/eligibility/">eligibility guide</a>.</p></noscript>
     </div>
-  </div>
+  </div></div>
 
   <script>
     import { questions, labelFor, type Question, type QuestionId } from '../lib/quiz/questions';

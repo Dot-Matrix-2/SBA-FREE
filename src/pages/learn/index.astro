@@ -3,20 +3,25 @@ import Layout from '../../layouts/Layout.astro';
 import { topics } from '../../lib/topics';
 ---
 
-<Layout title="Learn About SBA 7(a) Loans" description="Plain-English guides to SBA 7(a) term loans: eligibility, uses, rates, collateral, and how to apply.">
-  <div class="wrap">
-    <p class="crumbs"><a href="/">Home</a> / Learn</p>
-    <h1>Learn About SBA 7(a) Loans</h1>
-    <p>Free guides written for small business owners. Start anywhere, or <a href="/quiz/">take the quiz</a>.</p>
-    <div class="cards">
-      {topics.map((t) => (
-        <div class="card">
-          <h3>{t.title}</h3>
-          <p>{t.summary}</p>
-          <a class="more" href={t.href}>Read more</a>
-        </div>
-      ))}
+<Layout title="Learn About SBA 7(a) Loans" description="Guides to SBA 7(a) term loans: eligibility, uses, rates, collateral, and how to apply.">
+  <section class="page-head">
+    <div class="wrap">
+      <h1>Learn about SBA 7(a) loans</h1>
+      <p>Free guides written for small business owners. Start anywhere, or <a href="/quiz/">take the quiz</a>.</p>
     </div>
-  </div>
-  <div class="section"></div>
+  </section>
+  <section class="section">
+    <div class="wrap">
+      <ul class="index">
+        {topics.map((t) => (
+          <li>
+            <a class="row" href={t.href}>
+              <span class="title">{t.title}</span>
+              <p>{t.summary}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
 </Layout>

@@ -1,26 +1,45 @@
 ---
 import Layout from './Layout.astro';
+import { topics } from '../lib/topics';
 
 interface Props {
   frontmatter: { title: string; description?: string; reviewed?: string };
 }
 
 const { frontmatter } = Astro.props;
+const path = Astro.url.pathname;
+const inLearn = path.startsWith('/learn');
 ---
 
 <Layout title={frontmatter.title} description={frontmatter.description}>
   <div class="wrap">
     <p class="crumbs">
-      <a href="/">Home</a>{Astro.url.pathname.startsWith('/learn') && <> / <a href="/learn/">Learn</a></>}
+      <a href="/">Home</a>{inLearn && <> / <a href="/learn/">Learn</a></>}
     </p>
-    <article class="article">
-      <h1>{frontmatter.title}</h1>
-      {frontmatter.reviewed && <p class="reviewed">Last reviewed: {frontmatter.reviewed}</p>}
-      <slot />
-      <p class="callout">
-        <strong>Ready to see where you stand?</strong>{' '}
-        <a href="/quiz/">Take the free, anonymous eligibility quiz</a>. No personal information required.
-      </p>
-    </article>
+    <div class="article-layout">
+      <article class="article">
+        <h1>{frontmatter.title}</h1>
+        {frontmatter.reviewed && <p class="reviewed">Last reviewed: {frontmatter.reviewed}</p>}
+        <slot />
+        <p class="callout">
+          <strong>Ready to see where you stand?</strong>{' '}
+          <a href="/quiz/">Take the free, anonymous eligibility quiz</a>. No personal information required.
+        </p>
+      </article>
+      {inLearn && (
+        <aside class="aside" aria-label="More guides">
+          <h2>All guides</h2>
+          <ul>
+            {topics.map((t) => (
+              <li><a href={t.href} aria-current={path === t.href ? 'page' : undefined}>{t.title}</a></li>
+            ))}
+          </ul>
+          <div class="quiz-ad">
+            <p><strong>Curious if you qualify?</strong>The quiz takes about 3 minutes and asks for no personal details.</p>
+            <a class="btn" href="/quiz/">Take the quiz</a>
+          </div>
+        </aside>
+      )}
+    </div>
   </div>
 </Layout>

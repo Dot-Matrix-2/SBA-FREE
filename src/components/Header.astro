@@ -1,22 +1,27 @@
 ---
 const path = Astro.url.pathname;
 const links = [
-  { href: '/', label: 'Home' },
   { href: '/learn/', label: 'Learn' },
   { href: '/learn/faq/', label: 'FAQ' },
-  { href: '/quiz/', label: 'Eligibility Quiz' },
+  { href: '/quiz/', label: 'Eligibility quiz' },
   { href: '/about/', label: 'About' },
 ];
-const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+const isCurrent = (href: string) => (href === '/learn/' ? path.startsWith('/learn') && !path.startsWith('/learn/faq') : path.startsWith(href));
 ---
 
 <header class="banner">
   <div class="wrap">
     <a class="brand" href="/">
-      <span class="name">Free SBA Info</span>
-      <span class="tag">Your free guide to SBA 7(a) term loans</span>
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="6" fill="#0f1b4d"/><rect x="7" y="17" width="4.5" height="8" fill="#fff"></rect><rect x="13.75" y="12" width="4.5" height="13" fill="#fff"/><rect x="20.5" y="7" width="4.5" height="18" fill="#ffc83d"/>
+      </svg>
+      <span>
+        <span class="name">Free SBA Info</span>
+        <span class="tag">Your free guide to SBA 7(a) term loans</span>
+      </span>
     </a>
-    <nav class="nav" aria-label="Main">
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav class="nav" id="site-nav" aria-label="Main">
       <ul>
         {links.map((l) => (
           <li><a href={l.href} aria-current={isCurrent(l.href) ? 'page' : undefined}>{l.label}</a></li>
@@ -25,3 +30,12 @@ const isCurrent = (href: string) => (href === '/' ? path === '/' : path.startsWi
     </nav>
   </div>
 </header>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>('.nav-toggle');
+  const nav = document.getElementById('site-nav');
+  toggle?.addEventListener('click', () => {
+    const open = nav?.classList.toggle('open') ?? false;
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+</script>

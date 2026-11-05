@@ -1,35 +1,75 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { topics } from '../lib/topics';
+import { questions } from '../lib/quiz/questions';
 ---
 
 <Layout title="Free SBA Info">
   <section class="hero">
-    <div class="wrap hero-grid">
-      <div>
-        <p class="eyebrow">Straight answers. No sales pitch.</p>
-        <h1>Free Information About SBA 7(a) Term Loans</h1>
-        <p class="lede">
-          Thinking about a loan for your business? You’re in the right place. We explain SBA 7(a) loans in plain
-          English and help you see whether you may qualify. Everything here is free, with no sign-up required.
-        </p>
-        <p class="notice">
-          <mark>We are not a lender, and we are not a commercial loan broker.</mark> We do not
-          make loans or negotiate loan terms. We simply provide information.
-        </p>
-        <p class="cta-row">
-          <a class="btn big" href="/quiz/">Take the Free Eligibility Quiz</a>
-          <span class="cta-note">About 3 minutes. We never ask for your name, business name, or any identifying information.</span>
-        </p>
-      </div>
+    <div class="wrap">
+    <div class="hero-inner">
+      <h1>Free information about SBA 7(a) term loans</h1>
+      <p class="lede">
+        Thinking about a loan for your business? We explain how SBA 7(a) loans work, what lenders look for, and
+        what to expect along the way. Everything here is free, and no sign-up is necessary.
+      </p>
+      <p class="notice">
+        <mark>We are not a lender, and we are not a commercial loan broker.</mark> We do not
+        make loans or negotiate loan terms. We simply provide information.
+      </p>
+      <p class="cta-row">
+        <a class="btn big" href="/learn/">Learn More</a>
+        <a class="text-link" href="/about/">About this site</a>
+      </p>
+    </div>
     </div>
   </section>
 
   <section class="trust" aria-label="Why use this site">
     <div class="wrap trust-grid">
-      <p><strong>100% free</strong> No fees, no sign-up</p>
-      <p><strong>Anonymous quiz</strong> No personal information</p>
-      <p><strong>No obligation</strong> Lender referral is optional</p>
+      <p><strong>100% free</strong>No sign-up necessary</p>
+      <p><strong>Anonymous</strong>No personal information needed</p>
+      <p><strong>No obligation</strong>Lender referral is optional</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap why">
+      <div>
+        <h2 class="section-title">Why this site exists</h2>
+        <p>
+          Business loan information is often written by the people selling the loans, and it is hard to tell what
+          is accurate. We built this site so small business owners can understand SBA 7(a) loans before you talk
+          to any lender.
+        </p>
+        <p>
+          Our guides are based on public information from the SBA, and each page shows when it was last reviewed.
+          If you want to know where we stand, read <a href="/about/">how the site is run</a> and{' '}
+          <a href="/disclosures/">how we are compensated</a>.
+        </p>
+      </div>
+      <ul class="facts">
+        <li><strong>We are an educational website</strong><span>Guides on SBA 7(a) loans and a free, anonymous eligibility quiz.</span></li>
+        <li><strong>We do not lend</strong><span>We do not make loans, take applications, or make credit decisions.</span></li>
+        <li><strong>We are not part of the SBA</strong><span>Always confirm details at sba.gov or with a lender.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section tint">
+    <div class="wrap">
+      <h2 class="section-title">Questions? Start here.</h2>
+      <ul class="index">
+        {topics.slice(0, 6).map((t) => (
+          <li>
+            <a class="row" href={t.href}>
+              <span class="title">{t.title}</span>
+              <p>{t.summary}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p><a class="text-link" href="/learn/">See all topics</a></p>
     </div>
   </section>
 
@@ -39,11 +79,11 @@ import { topics } from '../lib/topics';
       <ol class="steps">
         <li>
           <h3>Learn the basics</h3>
-          <p>Read plain-English guides on what a 7(a) loan is, what it costs, and how to apply.</p>
+          <p>Read our guides on what a 7(a) loan is, what it costs, and how to apply.</p>
         </li>
         <li>
-          <h3>Take the anonymous quiz</h3>
-          <p>Answer a few questions about your business and the loan you want. No personal details are collected.</p>
+          <h3>Check your eligibility</h3>
+          <p>When you are ready, answer a few questions about your business and the loan you want. No personal details are collected.</p>
         </li>
         <li>
           <h3>Decide on next steps</h3>
@@ -56,18 +96,16 @@ import { topics } from '../lib/topics';
     </div>
   </section>
 
-  <section class="section alt">
+  <section class="closer">
     <div class="wrap">
-      <h2 class="section-title">Questions? Start here.</h2>
-      <ul class="index">
-        {topics.slice(0, 6).map((t) => (
-          <li>
-            <a class="title" href={t.href}>{t.title}</a>
-            <p>{t.summary}</p>
-          </li>
-        ))}
-      </ul>
-      <p><a href="/learn/">See all topics</a></p>
+      <div>
+        <h2>When you are ready, check your eligibility</h2>
+        <p>
+          {questions.length} questions, about 3 minutes. We never ask for your name, business name, or any
+          identifying information.
+        </p>
+      </div>
+      <a class="btn" href="/quiz/">Take the eligibility quiz</a>
     </div>
   </section>
 </Layout>

@@ -47,7 +47,7 @@ export const topics: Topic[] = [
   },
   {
     title: 'Glossary',
-    summary: 'Plain-English definitions of common lending terms.',
+    summary: 'Definitions of common lending terms.',
     href: '/learn/glossary/',
   },
 ];
